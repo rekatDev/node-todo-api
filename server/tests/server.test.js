@@ -12,7 +12,9 @@ const todos = [
   },
   {
     _id: new ObjectID(),
-    text: "Second test todo"
+    text: "Second test todo",
+    completed: true,
+    completedAt: 33
   }
 ];
 
@@ -124,6 +126,84 @@ describe("DELETE /todos/:id", () => {
     const id = "123abc";
     request(app)
       .delete(`/todos/${id}`)
+      .expect(404)
+      .end(done);
+  });
+});
+
+describe("PATCH /todos/:id", () => {
+  it("should update a todo to completed", done => {
+    const id = todos[0]._id.toHexString();
+    const text = "This is the new text";
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed: true,
+        text
+      })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo.completed).toBe(true);
+        expect(res.body.todo.completedAt).toBeA("number");
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(id)
+          .then(todo => {
+            expect(todo.text).toBe(text);
+            expect(todo.completed).toBe(true);
+            expect(todo.completedAt).toBeA("number");
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+  });
+
+  it("should update a todo to incomplete", done => {
+    const id = todos[1]._id.toHexString();
+    const text = "new text!!";
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed: false,
+        text
+      })
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo.completed).toBe(false);
+        expect(res.body.todo.completedAt).toNotExist();
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        Todo.findById(id)
+          .then(todo => {
+            expect(todo.text).toBe(text);
+            expect(todo.completed).toBe(false);
+            expect(todo.completedAt).toNotExist();
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+  });
+
+  it("should return a 404 if ObjectID is invalid", done => {
+    const id = "123abc";
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed: false
+      })
       .expect(404)
       .end(done);
   });
