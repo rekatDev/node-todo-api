@@ -93,7 +93,7 @@ describe("DELETE /todos/:id", () => {
 
         Todo.findById(id)
           .then(todo => {
-            expect(todo).toNotExist();
+            expect(todo).toBeFalsy();
             done();
           })
           .catch(err => {
@@ -115,7 +115,7 @@ describe("DELETE /todos/:id", () => {
 
         Todo.findById(id)
           .then(todo => {
-            expect(todo).toExist();
+            expect(todo).toBeTruthy();
             done();
           })
           .catch(err => {
@@ -157,7 +157,7 @@ describe("PATCH /todos/:id", () => {
       .expect(200)
       .expect(res => {
         expect(res.body.todo.completed).toBe(true);
-        expect(res.body.todo.completedAt).toBeA("number");
+        expect(typeof res.body.todo.completedAt).toBe("number");
       })
       .end((err, res) => {
         if (err) {
@@ -168,7 +168,7 @@ describe("PATCH /todos/:id", () => {
           .then(todo => {
             expect(todo.text).toBe(text);
             expect(todo.completed).toBe(true);
-            expect(todo.completedAt).toBeA("number");
+            expect(typeof todo.completedAt).toBe("number");
             done();
           })
           .catch(err => {
@@ -195,9 +195,9 @@ describe("PATCH /todos/:id", () => {
 
         Todo.findById(id)
           .then(todo => {
-            expect(todo.text).toNotBe(text);
-            expect(todo.completed).toNotBe(true);
-            expect(todo.completedAt).toNotExist();
+            expect(todo.text).not.toBe(text);
+            expect(todo.completed).not.toBe(true);
+            expect(todo.completedAt).toBeFalsy();
             done();
           })
           .catch(err => {
@@ -220,7 +220,7 @@ describe("PATCH /todos/:id", () => {
       .expect(200)
       .expect(res => {
         expect(res.body.todo.completed).toBe(false);
-        expect(res.body.todo.completedAt).toNotExist();
+        expect(res.body.todo.completedAt).toBeFalsy();
       })
       .end((err, res) => {
         if (err) {
@@ -231,7 +231,7 @@ describe("PATCH /todos/:id", () => {
           .then(todo => {
             expect(todo.text).toBe(text);
             expect(todo.completed).toBe(false);
-            expect(todo.completedAt).toNotExist();
+            expect(todo.completedAt).toBeFalsy();
             done();
           })
           .catch(err => {
@@ -289,9 +289,9 @@ describe("POST /users", () => {
       })
       .expect(200)
       .expect(res => {
-        expect(res.headers["x-auth"]).toExist();
+        expect(res.headers["x-auth"]).toBeDefined();
         expect(res.body.email).toBe(email);
-        expect(res.body._id).toExist();
+        expect(res.body._id).toBeDefined();
       })
       .end(err => {
         if (err) {
@@ -299,8 +299,8 @@ describe("POST /users", () => {
         }
         User.findOne({ email })
           .then(user => {
-            expect(user).toExist();
-            expect(user.password).toNotBe(password);
+            expect(user).toBeTruthy();
+            expect(user.password).not.toBe(password);
             done();
           })
           .catch(e => {
@@ -346,7 +346,7 @@ describe("POST /users/login", () => {
       .send({ email, password })
       .expect(200)
       .expect(res => {
-        expect(res.headers["x-auth"]).toExist();
+        expect(res.headers["x-auth"]).toBeDefined();
         expect(res.body.email).toBe(email);
         expect(res.body._id).toBe(id.toHexString());
       })
@@ -357,7 +357,7 @@ describe("POST /users/login", () => {
 
         User.findById(id)
           .then(user => {
-            expect(user.tokens[1]).toInclude({
+            expect(user.tokens[1]).toMatchObject({
               access: "auth",
               token: res.headers["x-auth"]
             });
@@ -378,7 +378,7 @@ describe("POST /users/login", () => {
       .send({ email, password })
       .expect(400)
       .expect(res => {
-        expect(res.headers["x-auth"]).toNotExist();
+        expect(res.headers["x-auth"]).toBeUndefined();
       })
       .end((err, res) => {
         if (err) {
