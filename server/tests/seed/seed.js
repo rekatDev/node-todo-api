@@ -19,7 +19,7 @@ const users = [
             _id: userOneId,
             access: "auth"
           },
-          "abc123"
+          process.env.JWT_SECRET
         )
       }
     ]
@@ -36,7 +36,7 @@ const users = [
               _id: userTwoId,
               access: "auth"
             },
-            "abc123"
+            process.env.JWT_SECRET
           )
         }
       ]
